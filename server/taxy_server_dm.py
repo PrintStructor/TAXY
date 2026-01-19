@@ -150,9 +150,9 @@ class Taxy_Server_Detection_Manager:
                 pos_matches = 0
 
             last_pos = pos
-            # Reduced sleep for better performance (0.1s = ~10 FPS theoretical max)
-            # Balanced between performance and stability
-            time.sleep(0.1)
+            # Wait 0.3s to leave time for the webcam server to catch up
+            # Crowsnest usually caches 0.3 seconds of frames
+            time.sleep(0.3)
 
         self.log("recursively_find_nozzle_position found: %s" % str(last_pos))
         self.log('*** exiting recursively_find_nozzle_position')
@@ -251,8 +251,8 @@ class Taxy_Server_Detection_Manager:
         self.superRelaxedDetector = cv2.SimpleBlobDetector_create(self.superRelaxedParams)
 
     def nozzleDetection(self, image):
-        # working frame object (shallow copy is 10x faster than deepcopy)
-        nozzleDetectFrame = image.copy()
+        # working frame object (deep copy required as frame is modified with cv2 drawing)
+        nozzleDetectFrame = copy.deepcopy(image)
         center = (None, None)
         
         # --- AI / YOLO Detection ---
