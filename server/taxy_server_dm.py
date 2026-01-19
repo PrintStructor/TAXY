@@ -159,14 +159,21 @@ class Taxy_Server_Detection_Manager:
         return pos
 
     def get_preview_frame(self, put_frame_func):
-        # self.log('*** calling get_preview_frame')
+        import time as perf_time
+        t_start = perf_time.time()
 
+        t1 = perf_time.time()
         frame = self.__io.get_single_frame()
+        t2 = perf_time.time()
+
         _, processed_frame = self.nozzleDetection(frame, fast_preview=True)
+        t3 = perf_time.time()
+
         if processed_frame is not None:
             put_frame_func(processed_frame)
+        t4 = perf_time.time()
 
-        # self.log('*** exiting get_preview_frame')
+        self.log(f'PERF: Camera:{(t2-t1)*1000:.0f}ms Detection:{(t3-t2)*1000:.0f}ms Put:{(t4-t3)*1000:.0f}ms Total:{(t4-t_start)*1000:.0f}ms')
         return
 
 # ----------------- TAMV Nozzle Detection as tested in taxy_cv -----------------
