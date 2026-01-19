@@ -102,10 +102,10 @@ install_klipper_extension() {
         return 1
     fi
 
-    # Copy extension files (not symlink - to avoid issues)
-    log_info "Copying extension files to ${KLIPPER_HOME}/klippy/extras/"
-    cp "${TAXY_REPO_DIR}/extension/taxy.py" "${KLIPPER_HOME}/klippy/extras/taxy.py"
-    cp "${TAXY_REPO_DIR}/extension/taxy_utl.py" "${KLIPPER_HOME}/klippy/extras/taxy_utl.py"
+    # Create symlinks for extension files (auto-updates with git pull)
+    log_info "Creating symlinks in ${KLIPPER_HOME}/klippy/extras/"
+    ln -sf "${TAXY_REPO_DIR}/extension/taxy.py" "${KLIPPER_HOME}/klippy/extras/taxy.py"
+    ln -sf "${TAXY_REPO_DIR}/extension/taxy_utl.py" "${KLIPPER_HOME}/klippy/extras/taxy_utl.py"
 
     log_info "Klipper extension installed"
 }
