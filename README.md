@@ -61,6 +61,9 @@ send_frame_to_cloud: false
 detection_tolerance: 0
 
 [include taxy-macros.cfg]
+
+# Optional: For multi-tool batch calibration (toolchanger setups)
+# [include taxy-batch-macros.cfg]
 ```
 
 Restart Klipper:
@@ -122,6 +125,53 @@ sudo systemctl restart klipper
 | `GET_OFFSET_TAXY` | Calculate XY offset from origin |
 | `SIMPLE_NOZZLE_POSITION_TAXY` | Get nozzle position (no move) |
 | `SEND_SERVER_CFG_TAXY` | Send config to server |
+
+### Advanced: Batch Calibration (Multi-Tool Setups)
+
+For toolchanger printers with multiple tools, TAXY provides advanced batch calibration macros that measure every tool relative to every other tool for maximum accuracy.
+
+**Setup:**
+Add to your `printer.cfg`:
+```ini
+[include taxy-batch-macros.cfg]
+```
+
+**Full Matrix Calibration** (each tool as reference):
+```gcode
+TAXY_CALIBRATE_ALL_TOOLS_XY
+# Measures: T0→T1-T5, T1→T0,T2-T5, ... T5→T0-T4
+# Total: 6×5 = 30 measurements
+# Camera calibration runs only ONCE (at T0) for efficiency
+```
+
+**Single Reference Tool** (faster, one initial tool):
+```gcode
+TAXY_CAMERA_SETUP TOOL=0          # Setup with T0 as reference
+TAXY_CALIBRATE_XY INITIAL_TOOL=0  # Measure T1-T5 relative to T0
+SAVE_CONFIG
+```
+
+**Recalibrate Single Tool:**
+```gcode
+TAXY_RECALIBRATE_TOOL TOOL=3 INITIAL_TOOL=0 [HEAT=1] [HEAT_TEMP=150]
+```
+
+**Batch Calibration Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `TAXY_CALIBRATE_ALL_TOOLS_XY` | Full matrix calibration (30 measurements) |
+| `TAXY_CAMERA_SETUP TOOL=<n>` | One-time camera setup with reference tool |
+| `TAXY_CALIBRATE_XY INITIAL_TOOL=<n>` | Measure all tools vs. initial tool |
+| `TAXY_RECALIBRATE_TOOL TOOL=<n>` | Recalibrate single tool |
+| `TAXY_BATCH_ABORT` | Emergency abort of running batch calibration |
+| `TAXY_ABORT` | Emergency stop - disable calibration mode |
+
+**Benefits of Full Matrix Calibration:**
+- Each tool measured from 5 different perspectives
+- Statistical averaging reduces random errors
+- Detects systematic issues (camera alignment, mechanical play)
+- Offsets saved to `SAVE_CONFIG` as usual
 
 ---
 
