@@ -115,8 +115,8 @@ class Taxy_Server_Detection_Manager:
 
         while time.time() - start_time < timeout:
             frame = self.__io.get_single_frame()
-            # Save raw frame for data collection before processing (shallow copy is faster)
-            raw_frame = frame.copy() if (self.save_training or TELEGRAM_BOT_TOKEN) else None
+            # Save raw frame for data collection before processing (deep copy to prevent corruption)
+            raw_frame = copy.deepcopy(frame) if (self.save_training or TELEGRAM_BOT_TOKEN) else None
 
             positions, processed_frame = self.nozzleDetection(frame)
             if processed_frame is not None:
@@ -150,9 +150,9 @@ class Taxy_Server_Detection_Manager:
                 pos_matches = 0
 
             last_pos = pos
-            # Reduced sleep for better performance (0.05s = ~20 FPS theoretical max)
-            # Camera and ONNX inference are the real bottlenecks, not this delay
-            time.sleep(0.05)
+            # Reduced sleep for better performance (0.1s = ~10 FPS theoretical max)
+            # Balanced between performance and stability
+            time.sleep(0.1)
 
         self.log("recursively_find_nozzle_position found: %s" % str(last_pos))
         self.log('*** exiting recursively_find_nozzle_position')
