@@ -117,13 +117,14 @@ install_systemd_service() {
     if sudo lsof -i :${PORT} 2>/dev/null | grep -q LISTEN; then
         log_error "Port ${PORT} is already in use!"
         log_info "Stopping any existing services on port ${PORT}..."
+        sudo systemctl stop TAXY_server 2>/dev/null || true
         sudo systemctl stop taxy 2>/dev/null || true
         sudo systemctl stop ktay8 2>/dev/null || true
         sleep 2
     fi
 
     log_info "Creating systemd service file..."
-    sudo tee "${SYSTEMD_DIR}/taxy.service" > /dev/null <<EOF
+    sudo tee "${SYSTEMD_DIR}/TAXY_server.service" > /dev/null <<EOF
 [Unit]
 Description=TAXY Server - AI-based Tool Alignment
 After=network.target
@@ -142,16 +143,16 @@ EOF
 
     log_info "Enabling and starting TAXY service..."
     sudo systemctl daemon-reload
-    sudo systemctl enable taxy
-    sudo systemctl start taxy
+    sudo systemctl enable TAXY_server
+    sudo systemctl start TAXY_server
 
     sleep 3
 
-    if sudo systemctl is-active --quiet taxy; then
+    if sudo systemctl is-active --quiet TAXY_server; then
         log_info "TAXY service is running"
     else
         log_error "TAXY service failed to start"
-        log_error "Check logs: sudo journalctl -u taxy -n 50"
+        log_error "Check logs: sudo journalctl -u TAXY_server -n 50"
         return 1
     fi
 }
@@ -218,8 +219,8 @@ main() {
     log_info "2. Restart Klipper: sudo systemctl restart klipper"
     log_info "3. Test with: KTAY_START_PREVIEW (or CALIB_CAMERA_KTAY8 macro)"
     log_blank
-    log_info "Server status: sudo systemctl status taxy"
-    log_info "Server logs: sudo journalctl -u taxy -f"
+    log_info "Server status: sudo systemctl status TAXY_server"
+    log_info "Server logs: sudo journalctl -u TAXY_server -f"
     log_blank
 }
 
