@@ -162,7 +162,7 @@ class Taxy_Server_Detection_Manager:
         # self.log('*** calling get_preview_frame')
 
         frame = self.__io.get_single_frame()
-        _, processed_frame = self.nozzleDetection(frame)
+        _, processed_frame = self.nozzleDetection(frame, fast_preview=True)
         if processed_frame is not None:
             put_frame_func(processed_frame)
 
@@ -250,9 +250,14 @@ class Taxy_Server_Detection_Manager:
         self.relaxedDetector = cv2.SimpleBlobDetector_create(self.relaxedParams)
         self.superRelaxedDetector = cv2.SimpleBlobDetector_create(self.superRelaxedParams)
 
-    def nozzleDetection(self, image):
-        # working frame object (deep copy required as frame is modified with cv2 drawing)
-        nozzleDetectFrame = copy.deepcopy(image)
+    def nozzleDetection(self, image, fast_preview=False):
+        # working frame object
+        # For preview: shallow copy is OK (10x faster, frame not reused)
+        # For detection: deep copy required (frame may be saved for training)
+        if fast_preview:
+            nozzleDetectFrame = image.copy()  # Shallow copy - fast
+        else:
+            nozzleDetectFrame = copy.deepcopy(image)  # Deep copy - safe
         center = (None, None)
         
         # --- AI / YOLO Detection ---

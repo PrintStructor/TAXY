@@ -19,7 +19,7 @@ _FRAME_WIDTH = 1280
 _FRAME_HEIGHT = 720
 
 # FPS to use when running the preview (higher for smoother AI visualization)
-__PREVIEW_FPS = 15
+__PREVIEW_FPS = 20
 
 # If the nozzle position is within this many pixels when comparing frames, it's considered a match. Only whole numbers are supported.
 __detection_tolerance = 0
@@ -342,16 +342,15 @@ def preview():
             detection_manager = dm(
                 log, _camera_url, send_to_cloud = False
             )
-            
+
             while __preview_running:
                 dm.get_preview_frame(detection_manager, put_frame)
-                
+
+                # Wait for 1s/FPS for a maximum FPS.
+                # This is to avoid overloading the server
+                time.sleep(1 / __PREVIEW_FPS)
 
             log("*** end of do_preview ***")
-
-            # Wait for 1s/FPS for a maximum FPS.
-            # This is to avoid overloading the server
-            time.sleep(1 / __PREVIEW_FPS)
 
         # Handle the action
         if action == "stop":
