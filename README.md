@@ -211,6 +211,8 @@ To use a custom model:
 
 **Training your own model**: Collect failed detection images via `send_frame_to_cloud: true` and retrain to improve detection for your specific setup.
 
+📚 **Full training guide**: See [Custom Model Training Guide](docs/CUSTOM_MODEL_TRAINING.md) for step-by-step instructions on collecting images, annotating, training with Google Colab (free GPU), and deploying your custom model.
+
 ---
 
 ## 🔧 Troubleshooting
