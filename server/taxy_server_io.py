@@ -4,9 +4,9 @@ from requests.exceptions import InvalidURL, ConnectionError # , HTTPError, Reque
 
 import base64
 
-# Size of frame to use
-_FRAME_WIDTH = 640
-_FRAME_HEIGHT = 480
+# Size of frame to use (1280x720 for better detection accuracy)
+_FRAME_WIDTH = 1280
+_FRAME_HEIGHT = 720
  
 class Taxy_Server_Io:
     def __init__(self, log, camera_url, cloud_url, save_image = False):

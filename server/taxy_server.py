@@ -16,12 +16,12 @@ __CLOUD_URL = "http://taxy.ignat.se/index.php"
 __CV_TIMEOUT = 20  
 # Minimum amount of matches to confirm toolhead position after a move
 __CV_MIN_MATCHES = 3 
-# Size of frame to use
-_FRAME_WIDTH = 640
-_FRAME_HEIGHT = 480
+# Size of frame to use (1280x720 for better detection accuracy)
+_FRAME_WIDTH = 1280
+_FRAME_HEIGHT = 720
 
-# FPS to use when running the preview
-__PREVIEW_FPS = 2
+# FPS to use when running the preview (higher for smoother AI visualization)
+__PREVIEW_FPS = 15
 
 # If the nozzle position is within this many pixels when comparing frames, it's considered a match. Only whole numbers are supported.
 __detection_tolerance = 0
@@ -440,7 +440,7 @@ def drawOnFrame(usedFrame):
                 
     return usedFrame
 
-def drawTextOnFrame(usedFrame, text, row=1, row_width=640):
+def drawTextOnFrame(usedFrame, text, row=1, row_width=1280):
     try:
         FONT_SIZE = 28
         FONT_COLOR = (255, 255, 255)

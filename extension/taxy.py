@@ -6,8 +6,8 @@ import json
 
 
 class taxy:
-    __FRAME_WIDTH = 640
-    __FRAME_HEIGHT = 480
+    __FRAME_WIDTH = 1280
+    __FRAME_HEIGHT = 720
 
     def __init__(self, config):
         # Load config values

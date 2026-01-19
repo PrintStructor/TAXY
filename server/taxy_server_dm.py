@@ -387,14 +387,14 @@ class Taxy_Server_Detection_Manager:
         else:
             # no keypoints, draw a 3 outline circle in the middle of the frame
             keypointRadius = 17
-            nozzleDetectFrame = cv2.circle(img=nozzleDetectFrame, center=(320,240), radius=keypointRadius, color=(0,0,0), thickness=3,lineType=cv2.LINE_AA)
-            nozzleDetectFrame = cv2.circle(img=nozzleDetectFrame, center=(320,240), radius=keypointRadius+1, color=(0,0,255), thickness=1,lineType=cv2.LINE_AA)
+            nozzleDetectFrame = cv2.circle(img=nozzleDetectFrame, center=(640,360), radius=keypointRadius, color=(0,0,0), thickness=3,lineType=cv2.LINE_AA)
+            nozzleDetectFrame = cv2.circle(img=nozzleDetectFrame, center=(640,360), radius=keypointRadius+1, color=(0,0,255), thickness=1,lineType=cv2.LINE_AA)
             center = None
-        # draw crosshair
-        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (320,0), (320,480), (0,0,0), 2)
-        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (0,240), (640,240), (0,0,0), 2)
-        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (320,0), (320,480), (255,255,255), 1)
-        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (0,240), (640,240), (255,255,255), 1)
+        # draw crosshair (1280x720 centered at 640,360)
+        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (640,0), (640,720), (0,0,0), 2)
+        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (0,360), (1280,360), (0,0,0), 2)
+        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (640,0), (640,720), (255,255,255), 1)
+        nozzleDetectFrame = cv2.line(nozzleDetectFrame, (0,360), (1280,360), (255,255,255), 1)
 
         # return(center, nozzleDetectFrame)
         return(center, nozzleDetectFrame)

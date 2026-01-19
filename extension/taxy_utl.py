@@ -1,7 +1,15 @@
-# kTAY8 Utility Functions
+# TAXY Utility Functions
 import json, time
-from statistics import mean, stdev
 import logging
+
+# Avoid conflict with Klipper's statistics.py - implement mean/stdev locally
+def _mean(values):
+    return sum(values) / len(values)
+
+def _stdev(values):
+    m = _mean(values)
+    variance = sum((x - m) ** 2 for x in values) / len(values)
+    return variance ** 0.5
 
 # For server_request
 import typing
@@ -11,8 +19,8 @@ import urllib.request
 from email.message import Message  # For headers in server_request
 
 __SERVER_REQUEST_TIMEOUT = 2
-__FRAME_WIDTH = 640
-__FRAME_HEIGHT = 480
+__FRAME_WIDTH = 1280
+__FRAME_HEIGHT = 720
 
 class NozzleNotFoundException(Exception):
     pass
@@ -212,8 +220,8 @@ def get_average_mpp(
 
 def _get_std_dev_and_mean(mpps: list):
     # Calculate the average mm per pixel and the standard deviation
-    mpps_std_dev = stdev(mpps)
-    mpp = round(mean(mpps), 3)
+    mpps_std_dev = _stdev(mpps)
+    mpp = round(_mean(mpps), 3)
     return mpps_std_dev, mpp
 
 
