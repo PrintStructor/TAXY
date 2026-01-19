@@ -179,9 +179,10 @@ TAXY_RECALIBRATE_TOOL TOOL=3 INITIAL_TOOL=0 [HEAT=1] [HEAT_TEMP=150]
 
 TAXY uses **YOLOv8n** (Nano) optimized for edge inference:
 
-- **Model**: `best.onnx` (12MB)
-- **Input**: 640×640 RGB images
-- **Inference**: ONNX Runtime (CPU-optimized for Raspberry Pi)
+- **Camera Resolution**: 1280×720 (upgrade from 640×480 for better accuracy)
+- **Model Input**: 640×640 RGB images (automatically resized from camera frame)
+- **Model File**: `best.onnx` (12MB)
+- **Inference Engine**: ONNX Runtime (CPU-optimized for Raspberry Pi)
 - **Precision**: Sub-pixel center detection via bounding box
 - **Fallback**: If model not found, falls back to traditional blob detection
 
@@ -190,6 +191,25 @@ TAXY uses **YOLOv8n** (Nano) optimized for edge inference:
 - **Detection Accuracy**: >95% on validation set
 - **mAP@0.5**: 0.92
 - **Inference Time**: ~100-200ms on Raspberry Pi 4
+
+### Advanced: Custom AI Models
+
+TAXY supports different YOLOv8 model sizes. Larger models are more accurate but slower:
+
+| Model | Size | Inference Time (RPi4) | Use Case |
+|-------|------|----------------------|----------|
+| YOLOv8n | 12 MB | ~100-200ms | Default - Best balance |
+| YOLOv8s | 25 MB | ~200-350ms | Better accuracy, acceptable speed |
+| YOLOv8m | 52 MB | ~400-600ms | High accuracy, slower |
+| YOLOv8l | 87 MB | ~600-900ms | Maximum accuracy, not recommended for RPi |
+
+To use a custom model:
+1. Train your YOLOv8 model with your nozzle images
+2. Export to ONNX: `yolo export model=your_model.pt format=onnx`
+3. Replace `~/TAXY/server/best.onnx` with your model
+4. Restart service: `sudo systemctl restart taxy`
+
+**Training your own model**: Collect failed detection images via `send_frame_to_cloud: true` and retrain to improve detection for your specific setup.
 
 ---
 
