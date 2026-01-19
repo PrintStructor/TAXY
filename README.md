@@ -93,25 +93,42 @@ sudo systemctl restart klipper
    CALIB_CAMERA_TAXY
    ```
 
-4. **Find nozzle center**
+4. **Find nozzle center** (with reference tool T0)
    ```gcode
    FIND_NOZZLE_CENTER_TAXY
    ```
 
-5. **Save origin** (for reference tool)
+5. **Save origin** (for reference tool T0)
    ```gcode
    SET_ORIGIN_TAXY
    ```
 
-6. **Measure offset** (for other tools)
+6. **Switch to next tool** (T1, T2, ..., T5)
+   ```gcode
+   T1
+   ```
+
+7. **Move to camera position**
+   ```gcode
+   MOVE_TO_ORIGIN_TAXY
+   ```
+
+8. **Find nozzle center** (for current tool)
+   ```gcode
+   FIND_NOZZLE_CENTER_TAXY
+   ```
+
+9. **Measure offset** (relative to origin)
    ```gcode
    GET_OFFSET_TAXY
    ```
 
-7. **Stop preview**
-   ```gcode
-   STOP_PREVIEW_TAXY
-   ```
+10. **Repeat steps 6-9** for remaining tools (T2, T3, T4, T5)
+
+11. **Stop preview**
+    ```gcode
+    STOP_PREVIEW_TAXY
+    ```
 
 ### Available Commands
 
