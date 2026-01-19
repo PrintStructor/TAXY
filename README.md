@@ -251,7 +251,7 @@ Common issues:
 - Port 8085 already in use → stop conflicting service
 - Missing dependencies → reinstall venv: `rm -rf ~/taxy-env && ./install.sh`
 
-### "Unknown command: KTAY_*"
+### "Unknown command: TAXY_*"
 - Klipper extension not loaded
 - Check: `ls ~/klipper/klippy/extras/taxy.py`
 - Restart Klipper: `sudo systemctl restart klipper`

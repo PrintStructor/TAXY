@@ -52,45 +52,45 @@ class taxy:
         # IMPORTANT:
         # Klipper treats commands with letters+digits as a single token (e.g. "KTAY8"),
         # so "KTAY8_START_PREVIEW" becomes malformed.
-        # Therefore we register KTAY_* commands instead of KTAY8_*.
+        # Therefore we register TAXY_* commands instead of KTAY8_*.
         self.gcode.register_command(
-            "KTAY_CALIB_CAMERA",
+            "TAXY_CALIB_CAMERA",
             self.cmd_KTAY8_CALIB_CAMERA,
             desc=self.cmd_KTAY8_CALIB_CAMERA_help,
         )
         self.gcode.register_command(
-            "KTAY_FIND_NOZZLE_CENTER",
+            "TAXY_FIND_NOZZLE_CENTER",
             self.cmd_FIND_NOZZLE_CENTER,
             desc=self.cmd_FIND_NOZZLE_CENTER_help,
         )
         self.gcode.register_command(
-            "KTAY_SET_ORIGIN", self.cmd_SET_CENTER, desc=self.cmd_SET_CENTER_help
+            "TAXY_SET_ORIGIN", self.cmd_SET_CENTER, desc=self.cmd_SET_CENTER_help
         )
         self.gcode.register_command(
-            "KTAY_GET_OFFSET", self.cmd_GET_OFFSET, desc=self.cmd_GET_OFFSET_help
+            "TAXY_GET_OFFSET", self.cmd_GET_OFFSET, desc=self.cmd_GET_OFFSET_help
         )
         self.gcode.register_command(
-            "KTAY_MOVE_TO_ORIGIN",
+            "TAXY_MOVE_TO_ORIGIN",
             self.cmd_MOVE_TO_ORIGIN,
             desc=self.cmd_MOVE_TO_ORIGIN_help
         )
         self.gcode.register_command(
-            "KTAY_SIMPLE_NOZZLE_POSITION",
+            "TAXY_SIMPLE_NOZZLE_POSITION",
             self.cmd_SIMPLE_NOZZLE_POSITION,
             desc=self.cmd_SIMPLE_NOZZLE_POSITION_help,
         )
         self.gcode.register_command(
-            "KTAY_SEND_SERVER_CFG",
+            "TAXY_SEND_SERVER_CFG",
             self.cmd_SEND_SERVER_CFG,
             desc=self.cmd_SEND_SERVER_CFG_help,
         )
         self.gcode.register_command(
-            "KTAY_START_PREVIEW",
+            "TAXY_START_PREVIEW",
             self.cmd_START_PREVIEW,
             desc=self.cmd_START_PREVIEW_help,
         )
         self.gcode.register_command(
-            "KTAY_STOP_PREVIEW",
+            "TAXY_STOP_PREVIEW",
             self.cmd_STOP_PREVIEW,
             desc=self.cmd_STOP_PREVIEW_help,
         )
@@ -153,7 +153,7 @@ class taxy:
     def cmd_GET_OFFSET(self, gcmd):
         if self.cp is None:
             raise self.gcode.error(
-                "No center position set, use KTAY_SET_ORIGIN to set it to the"
+                "No center position set, use TAXY_SET_ORIGIN to set it to the"
                 + " position you want to get offset from"
             )
             return
@@ -176,7 +176,7 @@ class taxy:
     def cmd_MOVE_TO_ORIGIN(self, gcmd):
         if self.cp is None:
             raise self.gcode.error(
-                "No origin set. Use KTAY_SET_ORIGIN first to save the reference position."
+                "No origin set. Use TAXY_SET_ORIGIN first to save the reference position."
             )
         self.pm.ensureHomed()
 

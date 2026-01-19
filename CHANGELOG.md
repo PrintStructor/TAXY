@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial TAXY release based on kTAY8 project
 - YOLOv8 AI-powered nozzle detection
-- Klipper extension with `KTAY_*` commands (fixed naming to avoid Klipper parsing issues)
+- Klipper extension with `TAXY_*` commands (fixed naming to avoid Klipper parsing issues)
 - Bulletproof `install.sh` with proper function ordering
 - Complete documentation (README, troubleshooting, naming rationale)
 - TAXY-prefixed macros for clean user experience
@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tool offset measurement
 
 ### Fixed
-- Command naming issue: `KTAY8_*` → `KTAY_*` to avoid Klipper "Malformed command" error
+- Command naming issue: `KTAY8_*` → `TAXY_*` to avoid Klipper "Malformed command" error
 - Install script function definition order (functions now defined before use)
 - Statistics module import conflict (local implementation instead of stdlib)
 - Python cache issues (proper venv handling)

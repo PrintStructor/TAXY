@@ -27,14 +27,17 @@ can be interpreted as:
 ### Fix: register commands without the digit
 We switched to:
 
-✅ `KTAY_*` → (or optionally `TAXY_*` as a future improvement)
+✅ `TAXY_*` (formerly `TAXY_*`)
 
 Example:
 
-- `KTAY_START_PREVIEW`
-- `KTAY_SEND_SERVER_CFG`
+- `TAXY_START_PREVIEW`
+- `TAXY_SEND_SERVER_CFG`
+- `TAXY_CALIB_CAMERA`
 
 This completely avoids the malformed parsing and works reliably in Klipper.
+
+**Note**: Internal commands are now `TAXY_*` to match the project name, while user-facing macros use the same naming for consistency.
 
 ---
 
@@ -62,7 +65,7 @@ A Python server that runs on the host (Raspberry Pi, etc.) and provides endpoint
 
 ## ✅ Our GitHub-template changes (what we changed)
 
-### ✅ 1) Fixed Klipper command naming: `KTAY8_*` → `KTAY_*`
+### ✅ 1) Fixed Klipper command naming: `KTAY8_*` → `TAXY_*`
 
 We patched the extension to register safe command names in `handle_ready()`.
 
@@ -73,14 +76,14 @@ We patched the extension to register safe command names in `handle_ready()`.
 - …
 
 **After (ours):**
-- `KTAY_CALIB_CAMERA`
-- `KTAY_START_PREVIEW`
-- `KTAY_SEND_SERVER_CFG`
-- `KTAY_STOP_PREVIEW`
-- `KTAY_FIND_NOZZLE_CENTER`
-- `KTAY_SIMPLE_NOZZLE_POSITION`
-- `KTAY_SET_ORIGIN`
-- `KTAY_GET_OFFSET`
+- `TAXY_CALIB_CAMERA`
+- `TAXY_START_PREVIEW`
+- `TAXY_SEND_SERVER_CFG`
+- `TAXY_STOP_PREVIEW`
+- `TAXY_FIND_NOZZLE_CENTER`
+- `TAXY_SIMPLE_NOZZLE_POSITION`
+- `TAXY_SET_ORIGIN`
+- `TAXY_GET_OFFSET`
 
 ✅ Result: No more `Malformed command ...`
 
@@ -104,15 +107,15 @@ sudo ln -s /home/pi/kTAY8/extension/ktay8_utl.py ~/klipper/klippy/extras/ktay8_u
 
 ---
 
-### ✅ 3) Updated macros to call the new `KTAY_*` commands
+### ✅ 3) Updated macros to call the new `TAXY_*` commands
 
 Old macros called:
 - `KTAY8_START_PREVIEW`, `KTAY8_SEND_SERVER_CFG`, …
 
 New macros call:
-- `KTAY_START_PREVIEW`, `KTAY_SEND_SERVER_CFG`, …
+- `TAXY_START_PREVIEW`, `TAXY_SEND_SERVER_CFG`, …
 
-✅ Result: No more `Unknown command:"KTAY_*"` once extension is patched and linked.
+✅ Result: No more `Unknown command:"TAXY_*"` once extension is patched and linked.
 
 ---
 
@@ -125,7 +128,7 @@ Example:
 [gcode_macro KTAY8]
 description: Compatibility wrapper (catches old/invalid KTAY8 calls)
 gcode:
-  RESPOND TYPE=error MSG="KTAY8 base command called. Use KTAY_* commands instead."
+  RESPOND TYPE=error MSG="KTAY8 base command called. Use TAXY_* commands instead."
 ```
 
 ---
@@ -137,7 +140,7 @@ You have two good options:
 ---
 
 ### Option A (keep your current style – easy migration)
-Keep the *macro names* as `*_KTAY8`, but internally call `KTAY_*`.
+Keep the *macro names* as `*_KTAY8`, but internally call `TAXY_*`.
 
 ✅ Pros: your UI buttons / muscle memory stay the same
 ✅ Cons: still visually contains “KTAY8”
@@ -147,15 +150,15 @@ Example file: `ktay8-macros.cfg`
 ```ini
 [gcode_macro SEND_SERVER_CFG_KTAY8]
 gcode:
-  KTAY_SEND_SERVER_CFG
+  TAXY_SEND_SERVER_CFG
 
 [gcode_macro START_PREVIEW_KTAY8]
 gcode:
-  KTAY_START_PREVIEW
+  TAXY_START_PREVIEW
 
 [gcode_macro STOP_PREVIEW_KTAY8]
 gcode:
-  KTAY_STOP_PREVIEW
+  TAXY_STOP_PREVIEW
 ```
 
 ---
@@ -184,35 +187,35 @@ Example macros:
 ```ini
 [gcode_macro TAXY_SEND_SERVER_CFG]
 gcode:
-  KTAY_SEND_SERVER_CFG
+  TAXY_SEND_SERVER_CFG
 
 [gcode_macro TAXY_START_PREVIEW]
 gcode:
-  KTAY_START_PREVIEW
+  TAXY_START_PREVIEW
 
 [gcode_macro TAXY_STOP_PREVIEW]
 gcode:
-  KTAY_STOP_PREVIEW
+  TAXY_STOP_PREVIEW
 
 [gcode_macro TAXY_CALIB_CAMERA]
 gcode:
-  KTAY_CALIB_CAMERA
+  TAXY_CALIB_CAMERA
 
 [gcode_macro TAXY_FIND_NOZZLE_CENTER]
 gcode:
-  KTAY_FIND_NOZZLE_CENTER
+  TAXY_FIND_NOZZLE_CENTER
 
 [gcode_macro TAXY_SIMPLE_NOZZLE_POSITION]
 gcode:
-  KTAY_SIMPLE_NOZZLE_POSITION
+  TAXY_SIMPLE_NOZZLE_POSITION
 
 [gcode_macro TAXY_SET_ORIGIN]
 gcode:
-  KTAY_SET_ORIGIN
+  TAXY_SET_ORIGIN
 
 [gcode_macro TAXY_GET_OFFSET]
 gcode:
-  KTAY_GET_OFFSET
+  TAXY_GET_OFFSET
   TAXY_PRINT_OFFSET
 ```
 
@@ -289,7 +292,7 @@ TAXY_STOP_PREVIEW
 ---
 
 ## ✅ Future Improvement (Optional)
-To make everything fully consistent, we can also rename the internal Klipper commands from `KTAY_*` to `TAXY_*` inside the extension.
+To make everything fully consistent, we can also rename the internal Klipper commands from `TAXY_*` to `TAXY_*` inside the extension.
 
 That would register commands like:
 - `TAXY_START_PREVIEW`
