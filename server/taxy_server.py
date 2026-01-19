@@ -7,7 +7,7 @@ import matplotlib.font_manager as fm
 from waitress import serve
 import logging, json, traceback
 from dataclasses import dataclass, field
-from taxy_server_dm import Ktay8_Server_Detection_Manager as dm
+from taxy_server_dm import Taxy_Server_Detection_Manager as dm
 
 __logdebug = ""
 # URL to the cloud server
