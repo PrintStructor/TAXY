@@ -1,0 +1,17 @@
+# Core dependencies for TAXY Server
+flask
+waitress
+Pillow
+numpy
+opencv-python
+requests
+matplotlib
+
+# AI / Inference Dependencies
+# For ONNX support (Recommended)
+onnxruntime
+
+# For TFLite support (Optional - for Orange Pi / ARM)
+# Note: On some ARM systems, install tflite-runtime via system packages
+# to avoid building from source.
+# tflite-runtime
