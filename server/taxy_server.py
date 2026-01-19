@@ -56,7 +56,7 @@ __standby_image = None
 # Define a global variable to store the camera path.
 _camera_url = None
 # Whether to send the frame to the cloud
-__send_frame_to_cloud = False
+__save_training_images = False
 # Define a global variable to store a key-value pair of the request id and the result
 request_results = dict()
 # The transform matrix calculated from the calibration points
@@ -136,7 +136,7 @@ def set_server_cfg():
         response = ""
 
         # Stoping preview if running
-        global __preview_running, __detection_tolerance, __send_frame_to_cloud
+        global __preview_running, __detection_tolerance, __save_training_images
         __preview_running = False
         
         # Get the camera path from the JSON object
@@ -149,17 +149,17 @@ def set_server_cfg():
         
         try:
             data = json.loads(request.data)
-            send_frame_to_cloud = data.get("send_frame_to_cloud")
+            save_training_images = data.get("save_training_images")
         except:
             pass
 
-        if send_frame_to_cloud is not None:
-            if send_frame_to_cloud == True:
-                __send_frame_to_cloud = True
-                response += "send_frame_to_cloud set to True\n"
+        if save_training_images is not None:
+            if save_training_images == True:
+                __save_training_images = True
+                response += "save_training_images set to True\n"
             else:
-                __send_frame_to_cloud = False
-                response += "send_frame_to_cloud set to False\n"
+                __save_training_images = False
+                response += "save_training_images set to False\n"
 
         try:
             data = json.loads(request.data)
@@ -284,7 +284,7 @@ def getNozzlePosition():
         def do_work():
             log("*** calling do_work ***")
             detection_manager = dm(
-                log, _camera_url, __send_frame_to_cloud
+                log, _camera_url, __save_training_images
             )
 
             position = detection_manager.recursively_find_nozzle_position(

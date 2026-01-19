@@ -27,7 +27,7 @@ Enable local image collection in your `printer.cfg`:
 
 ```ini
 [taxy]
-send_frame_to_cloud: true  # Temporarily enable to save images locally
+save_training_images: true  # Temporarily enable to save images locally
 ```
 
 Then run calibration normally. **All successful detections will be saved to `~/TAXY/collected_images/`** on your Raspberry Pi with metadata (coordinates, confidence).
@@ -185,7 +185,7 @@ Look for `last_nozzle_center_successful: true/false`
 
 ### Continuous Improvement
 
-1. **Collect more data**: Keep `send_frame_to_cloud: true` for a week to gather diverse scenarios
+1. **Collect more data**: Keep `save_training_images: true` for a week to gather diverse scenarios
 2. **Review collected images**: Check `~/TAXY/collected_images/` for challenging cases
 3. **Add to dataset**: Annotate new edge cases
 3. **Retrain**: Add new images to dataset and retrain

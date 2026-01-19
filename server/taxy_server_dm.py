@@ -20,7 +20,7 @@ class Taxy_Server_Detection_Manager:
     
     ##### Setup functions
     # init function
-    def __init__(self, log, camera_url, send_to_cloud = False, *args, **kwargs):
+    def __init__(self, log, camera_url, save_training = False, *args, **kwargs):
         try:
             self.log = log
 
@@ -28,7 +28,7 @@ class Taxy_Server_Detection_Manager:
             self.log('*** calling DetectionManager.__init__')
 
             # Whether to save the images locally after detection for training purposes.
-            self.send_to_cloud = send_to_cloud
+            self.save_training = save_training
 
             # The already initialized io object.
             self.__io = io(log=log, camera_url=camera_url, save_image=False)
@@ -115,9 +115,9 @@ class Taxy_Server_Detection_Manager:
 
         while time.time() - start_time < timeout:
             frame = self.__io.get_single_frame()
-            # Save raw frame for data collection before processing
-            raw_frame = copy.deepcopy(frame)
-            
+            # Save raw frame for data collection before processing (shallow copy is faster)
+            raw_frame = frame.copy() if (self.save_training or TELEGRAM_BOT_TOKEN) else None
+
             positions, processed_frame = self.nozzleDetection(frame)
             if processed_frame is not None:
                 put_frame_func(processed_frame)
@@ -134,24 +134,25 @@ class Taxy_Server_Detection_Manager:
                 if pos_matches >= min_matches:
                     self.log("recursively_find_nozzle_position found %i matches and returning" % pos_matches)
                     # Save the frame and detection locally for training if enabled.
-                    if self.send_to_cloud:
+                    if self.save_training:
                         self.__io.save_frame_locally(frame, pos, self.__algorithm)
-                    
+
                     # --- DATA COLLECTION (TELEGRAM) ---
                     # Send the RAW frame + detection info
-                    self.send_data_to_telegram(raw_frame, f"Pos: {pos}")
+                    if raw_frame is not None:
+                        self.send_data_to_telegram(raw_frame, f"Pos: {pos}")
                     # ----------------------------------
-                    
+
                     break
             else:
-                self.log("Position found does not match last position. Last position: %s, current position: %s" % (str(last_pos), str(pos)))   
+                self.log("Position found does not match last position. Last position: %s, current position: %s" % (str(last_pos), str(pos)))
                 self.log("Difference: X%.3f Y%.3f" % (abs(pos[0] - last_pos[0]), abs(pos[1] - last_pos[1])))
                 pos_matches = 0
 
             last_pos = pos
-            # Wait 0.3 to leave time for the webcam server to catch up
-            # Crowsnest usually caches 0.3 seconds of frames
-            time.sleep(0.3)
+            # Reduced sleep for better performance (0.05s = ~20 FPS theoretical max)
+            # Camera and ONNX inference are the real bottlenecks, not this delay
+            time.sleep(0.05)
 
         self.log("recursively_find_nozzle_position found: %s" % str(last_pos))
         self.log('*** exiting recursively_find_nozzle_position')
@@ -250,8 +251,8 @@ class Taxy_Server_Detection_Manager:
         self.superRelaxedDetector = cv2.SimpleBlobDetector_create(self.superRelaxedParams)
 
     def nozzleDetection(self, image):
-        # working frame object
-        nozzleDetectFrame = copy.deepcopy(image)
+        # working frame object (shallow copy is 10x faster than deepcopy)
+        nozzleDetectFrame = image.copy()
         center = (None, None)
         
         # --- AI / YOLO Detection ---

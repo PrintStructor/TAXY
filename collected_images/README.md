@@ -1,6 +1,6 @@
 # Collected Training Images
 
-This directory stores nozzle detection images when `send_frame_to_cloud: true` is enabled in your printer configuration.
+This directory stores nozzle detection images when `save_training_images: true` is enabled in your printer configuration.
 
 ## Purpose
 
@@ -14,7 +14,7 @@ When a successful nozzle detection occurs:
 
 ## Using These Images
 
-1. **Collect 50-200 images** with `send_frame_to_cloud: true`
+1. **Collect 50-200 images** with `save_training_images: true`
 2. **Annotate** them using Roboflow or Label Studio
 3. **Train** a custom YOLOv8 model (see [Custom Model Training Guide](../docs/CUSTOM_MODEL_TRAINING.md))
 4. **Deploy** your improved model to TAXY

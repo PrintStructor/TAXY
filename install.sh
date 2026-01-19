@@ -210,7 +210,7 @@ main() {
     echo "    nozzle_cam_url: http://localhost/webcam/snapshot?max_delay=0"
     echo "    server_url: http://localhost:8085"
     echo "    move_speed: 1800"
-    echo "    send_frame_to_cloud: false"
+    echo "    save_training_images: false"
     echo "    detection_tolerance: 0"
     echo ""
     echo "    [include taxy-macros.cfg]"

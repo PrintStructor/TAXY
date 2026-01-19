@@ -18,7 +18,7 @@ class taxy:
             "calib_iterations", 1, minval=1, maxval=25
         )
         self.calib_value = config.getfloat("calib_value", 1.0, above=0.25)
-        self.send_frame_to_cloud = config.getboolean("send_frame_to_cloud", False)
+        self.save_training_images = config.getboolean("save_training_images", False)
         self.detection_tolerance = config.getint(
             "detection_tolerance", 0, minval=0, maxval=5
         )
@@ -68,6 +68,11 @@ class taxy:
         )
         self.gcode.register_command(
             "KTAY_GET_OFFSET", self.cmd_GET_OFFSET, desc=self.cmd_GET_OFFSET_help
+        )
+        self.gcode.register_command(
+            "KTAY_MOVE_TO_ORIGIN",
+            self.cmd_MOVE_TO_ORIGIN,
+            desc=self.cmd_MOVE_TO_ORIGIN_help
         )
         self.gcode.register_command(
             "KTAY_SIMPLE_NOZZLE_POSITION",
@@ -120,7 +125,7 @@ class taxy:
                 self.server_url,
                 "/set_server_cfg",
                 camera_url=_camera_url,
-                send_frame_to_cloud=self.send_frame_to_cloud,
+                save_training_images=self.save_training_images,
                 detection_tolerance=self.detection_tolerance,
             )
             gcmd.respond_info("kTAY8 Server response: %s" % str(rr))
@@ -161,6 +166,25 @@ class taxy:
         self.gcode.respond_info(
             "Offset from center is X:%.3f Y:%.3f"
             % (self.last_calculated_offset[0], self.last_calculated_offset[1])
+        )
+
+    cmd_MOVE_TO_ORIGIN_help = (
+        "Move to saved origin using RAW coordinates (ignoring tool offsets). "
+        "Use after tool change to return to calibration position."
+    )
+
+    def cmd_MOVE_TO_ORIGIN(self, gcmd):
+        if self.cp is None:
+            raise self.gcode.error(
+                "No origin set. Use KTAY_SET_ORIGIN first to save the reference position."
+            )
+        self.pm.ensureHomed()
+
+        # Move to saved origin using RAW coordinates
+        self.pm.moveAbsoluteRaw(X=self.cp[0], Y=self.cp[1], moveSpeed=self.speed)
+
+        self.gcode.respond_info(
+            "Moved to origin (RAW) X:%.3f Y:%.3f" % (self.cp[0], self.cp[1])
         )
 
     cmd_FIND_NOZZLE_CENTER_help = (
@@ -588,7 +612,7 @@ class taxy:
             "last_calculated_offset": self.last_calculated_offset,
             "mm_per_pixels": self.mpp,
             "is_calibrated": self.is_calibrated,
-            "send_frame_to_cloud": self.send_frame_to_cloud,
+            "save_training_images": self.save_training_images,
             "camera_center_coordinates": self.cp,
             "travel_speed": self.speed,
             "last_nozzle_center_successful": self.last_nozzle_center_successful,

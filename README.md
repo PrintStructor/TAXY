@@ -57,7 +57,7 @@ Add to your `printer.cfg`:
 nozzle_cam_url: http://localhost/webcam/snapshot?max_delay=0
 server_url: http://localhost:8085
 move_speed: 1800
-send_frame_to_cloud: false  # Set to 'true' to save detection images locally for custom training
+save_training_images: false  # Set to 'true' to save detection images locally for custom training
 detection_tolerance: 0
 
 [include taxy-macros.cfg]
@@ -226,7 +226,7 @@ To use a custom model:
 3. Replace `~/TAXY/server/best.onnx` with your model
 4. Restart service: `sudo systemctl restart taxy`
 
-**Training your own model**: Enable `send_frame_to_cloud: true` to automatically save detection images locally to `~/TAXY/collected_images/`. Use these images to train a custom model optimized for your specific nozzle setup.
+**Training your own model**: Enable `save_training_images: true` to automatically save detection images locally to `~/TAXY/collected_images/`. Use these images to train a custom model optimized for your specific nozzle setup.
 
 📚 **Full training guide**: See [Custom Model Training Guide](docs/CUSTOM_MODEL_TRAINING.md) for step-by-step instructions on collecting images, annotating, training with Google Colab (free GPU), and deploying your custom model.
 
@@ -291,7 +291,7 @@ Contributions welcome! Please:
 ### Improving AI Detection for Your Setup
 
 If TAXY fails to detect your nozzle consistently:
-1. Enable `send_frame_to_cloud: true` in your `[taxy]` config
+1. Enable `save_training_images: true` in your `[taxy]` config
 2. Collect 50-200 images during normal calibration operations
 3. Images are saved to `~/TAXY/collected_images/` on your Pi
 4. Train a custom model using the [Custom Model Training Guide](docs/CUSTOM_MODEL_TRAINING.md)

@@ -319,6 +319,23 @@ class taxy_pm:
     def moveAbsolute(self, X=None, Y=None, Z=None, moveSpeed=__defaultSpeed):
         self.moveAbsoluteToArray([X, Y, Z], moveSpeed)
 
+    def moveAbsoluteRaw(self, X=None, Y=None, Z=None, moveSpeed=__defaultSpeed):
+        """Move to absolute RAW position (ignoring tool offsets and gcode offsets)"""
+        # Get current raw position
+        current_pos = self.get_raw_position()
+
+        # Build target position (use current if not specified)
+        target_pos = [
+            X if X is not None else current_pos[0],
+            Y if Y is not None else current_pos[1],
+            Z if Z is not None else current_pos[2],
+            current_pos[3] if len(current_pos) > 3 else 0  # E axis
+        ]
+
+        # Use toolhead.manual_move() for RAW coordinate movement
+        self.toolhead.manual_move(target_pos, moveSpeed / 60.0)  # Convert mm/min to mm/s
+        self.toolhead.wait_moves()
+
     def get_gcode_position(self):
         gcode_move = self.printer.lookup_object("gcode_move")
         gcode_position = gcode_move.get_status()["gcode_position"]
