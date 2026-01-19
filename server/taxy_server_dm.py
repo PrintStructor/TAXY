@@ -20,18 +20,18 @@ class Taxy_Server_Detection_Manager:
     
     ##### Setup functions
     # init function
-    def __init__(self, log, camera_url, cloud_url, send_to_cloud = False, *args, **kwargs):
+    def __init__(self, log, camera_url, send_to_cloud = False, *args, **kwargs):
         try:
             self.log = log
 
             # send calling to log
             self.log('*** calling DetectionManager.__init__')
-            
-            # Whether to send the images to the cloud after detection.
+
+            # Whether to save the images locally after detection for training purposes.
             self.send_to_cloud = send_to_cloud
-            
+
             # The already initialized io object.
-            self.__io = io(log=log, camera_url=camera_url, cloud_url=cloud_url, save_image=False)
+            self.__io = io(log=log, camera_url=camera_url, save_image=False)
             
             # This is the last successful algorithm used by the nozzle detection. Should be reset at tool change. Will have to change.
             self.__algorithm = None
@@ -133,9 +133,9 @@ class Taxy_Server_Detection_Manager:
                 pos_matches += 1
                 if pos_matches >= min_matches:
                     self.log("recursively_find_nozzle_position found %i matches and returning" % pos_matches)
-                    # Send the frame and detection to the cloud if enabled.
+                    # Save the frame and detection locally for training if enabled.
                     if self.send_to_cloud:
-                        self.__io.send_frame_to_cloud(frame, pos, self.__algorithm)
+                        self.__io.save_frame_locally(frame, pos, self.__algorithm)
                     
                     # --- DATA COLLECTION (TELEGRAM) ---
                     # Send the RAW frame + detection info

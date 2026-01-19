@@ -23,14 +23,16 @@ This guide explains how to train a custom YOLOv8 model specifically for your noz
 
 ### Method A: Automatic Collection (Recommended)
 
-Enable cloud upload in your `printer.cfg`:
+Enable local image collection in your `printer.cfg`:
 
 ```ini
 [taxy]
-send_frame_to_cloud: true  # Temporarily enable
+send_frame_to_cloud: true  # Temporarily enable to save images locally
 ```
 
-Then run calibration normally. Failed detections will be uploaded to the cloud server for review.
+Then run calibration normally. **All successful detections will be saved to `~/TAXY/collected_images/`** on your Raspberry Pi with metadata (coordinates, confidence).
+
+**Privacy Note**: All images are stored locally - nothing is sent to external servers.
 
 ### Method B: Manual Collection
 
@@ -41,8 +43,9 @@ Then run calibration normally. Failed detections will be uploaded to the cloud s
 
 2. Position each tool over camera and take snapshots:
    ```bash
-   # Save snapshots from preview stream
-   curl http://192.168.178.188:8085/preview > tool0_clean.jpg
+   # Save snapshots from preview stream to collected_images
+   mkdir -p ~/TAXY/collected_images
+   curl http://192.168.178.188:8085/preview > ~/TAXY/collected_images/tool0_clean.jpg
    ```
 
 3. Collect diverse images:
@@ -53,6 +56,11 @@ Then run calibration normally. Failed detections will be uploaded to the cloud s
    - All 6 tools
 
 **Target**: 50-100 images minimum, 200+ images ideal
+
+**Tip**: After collection, transfer images to your PC:
+```bash
+scp -r pi@your-pi-ip:~/TAXY/collected_images ./training_data
+```
 
 ---
 
@@ -177,8 +185,9 @@ Look for `last_nozzle_center_successful: true/false`
 
 ### Continuous Improvement
 
-1. **Collect failed cases**: Keep `send_frame_to_cloud: true` for a week
-2. **Add to dataset**: Annotate new failure cases
+1. **Collect more data**: Keep `send_frame_to_cloud: true` for a week to gather diverse scenarios
+2. **Review collected images**: Check `~/TAXY/collected_images/` for challenging cases
+3. **Add to dataset**: Annotate new edge cases
 3. **Retrain**: Add new images to dataset and retrain
 4. **Deploy**: Replace model and test
 

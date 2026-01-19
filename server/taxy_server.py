@@ -10,8 +10,6 @@ from dataclasses import dataclass, field
 from taxy_server_dm import Taxy_Server_Detection_Manager as dm
 
 __logdebug = ""
-# URL to the cloud server
-__CLOUD_URL = "http://taxy.ignat.se/index.php"
 # If no nozzle found in this time, timeout the function
 __CV_TIMEOUT = 20  
 # Minimum amount of matches to confirm toolhead position after a move
@@ -286,7 +284,7 @@ def getNozzlePosition():
         def do_work():
             log("*** calling do_work ***")
             detection_manager = dm(
-                log, _camera_url, __CLOUD_URL, __send_frame_to_cloud
+                log, _camera_url, __send_frame_to_cloud
             )
 
             position = detection_manager.recursively_find_nozzle_position(
@@ -340,9 +338,9 @@ def preview():
 
         def do_preview():
             log("*** calling do_preview ***")
-            # Do not send images from preview to the cloud
+            # Do not save images during preview
             detection_manager = dm(
-                log, _camera_url, cloud_url = "", send_to_cloud = False
+                log, _camera_url, send_to_cloud = False
             )
             
             while __preview_running:

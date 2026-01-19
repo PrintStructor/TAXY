@@ -2,20 +2,25 @@ import cv2, numpy as np
 import requests
 from requests.exceptions import InvalidURL, ConnectionError # , HTTPError, RequestException
 
-import base64
+import os
+import json
+from datetime import datetime
 
 # Size of frame to use (1280x720 for better detection accuracy)
 _FRAME_WIDTH = 1280
 _FRAME_HEIGHT = 720
  
 class Taxy_Server_Io:
-    def __init__(self, log, camera_url, cloud_url, save_image = False):
+    def __init__(self, log, camera_url, save_image = False):
         self.log = log
         self.log(' *** initializing Taxy_Server_Io **** ')
         self.camera_url = camera_url
         self.save_image = save_image
-        self.cloud_url = cloud_url
         self.session = requests.Session()
+
+        # Local storage directory for training images
+        self.storage_dir = os.path.join(os.path.dirname(__file__), '..', 'collected_images')
+
         self.log(' *** initialized Taxy_Server_Io with camera_url = %s, save_image = %s **** ' % (str(camera_url), str(save_image)))
         
 
@@ -67,19 +72,43 @@ class Taxy_Server_Io:
             self.session.close()
             self.session = None
             
-    def send_frame_to_cloud(self, frame, points, algorithm):
+    def save_frame_locally(self, frame, points, algorithm):
+        """Save detection frame locally for custom model training"""
         try:
-            self.log(' *** calling send_frame_to_cloud **** ')
-            _, img_encoded = cv2.imencode('.jpg', frame)
-            data = {'photo': base64.b64encode(img_encoded), 'algorithm': algorithm, 'points': str(points)}
-            
-            response = requests.post(self.cloud_url, data=data)
-            if response.status_code != 200:
-                self.log("Failed to send frame to cloud, got status code %d" % response.status_code)
-                return False
-            self.log(' *** sent frame to cloud **** ')
-            self.log(' *** response = %s **** :' % response.text)
+            self.log(' *** calling save_frame_locally **** ')
+
+            # Create storage directory if it doesn't exist
+            os.makedirs(self.storage_dir, exist_ok=True)
+
+            # Generate filename with timestamp
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]  # milliseconds
+            image_filename = f"{timestamp}.jpg"
+            json_filename = f"{timestamp}.json"
+
+            image_path = os.path.join(self.storage_dir, image_filename)
+            json_path = os.path.join(self.storage_dir, json_filename)
+
+            # Save image
+            cv2.imwrite(image_path, frame)
+
+            # Save metadata (detection info for annotation reference)
+            metadata = {
+                'timestamp': timestamp,
+                'algorithm': algorithm,
+                'detected_position': {
+                    'x': float(points[0]) if len(points) > 0 else None,
+                    'y': float(points[1]) if len(points) > 1 else None,
+                    'confidence': float(points[2]) if len(points) > 2 else None
+                },
+                'image_file': image_filename
+            }
+
+            with open(json_path, 'w') as f:
+                json.dump(metadata, f, indent=2)
+
+            self.log(f' *** saved frame locally to {image_path} **** ')
             return True
+
         except Exception as e:
-            self.log("Failed to send frame to cloud %s" % str(e))
+            self.log("Failed to save frame locally: %s" % str(e))
             return False    
