@@ -57,8 +57,8 @@ class Taxy_Server_Detection_Manager:
                 if model_path:
                     self.log(f"*** Loading AI Model: {model_path}")
                     try:
-                        self.yolo_detector = NozzleDetector(model_path, conf_thres=0.4)
-                        self.log("*** AI Model loaded successfully.")
+                        self.yolo_detector = NozzleDetector(model_path, conf_thres=0.5)
+                        self.log("*** AI Model loaded successfully (conf_thres=0.5).")
                     except Exception as e:
                         self.log(f"*** Failed to load AI Model: {e}")
                 else:
@@ -290,12 +290,12 @@ class Taxy_Server_Detection_Manager:
                         if dist < min_dist:
                             min_dist = dist
                             best_res = res
-                            center = (int(cx), int(cy))
-                    
+                            center = (cx, cy)  # Sub-pixel precision (float)
+
                     # Draw results
                     x1, y1, x2, y2 = map(int, best_res['box'])
                     cv2.rectangle(nozzleDetectFrame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.circle(nozzleDetectFrame, center, 5, (0, 0, 255), -1)
+                    cv2.circle(nozzleDetectFrame, (int(center[0]), int(center[1])), 5, (0, 0, 255), -1)
                     label = f"Nozzle: {best_res['score']:.2f}"
                     cv2.putText(nozzleDetectFrame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                     
@@ -382,22 +382,36 @@ class Taxy_Server_Detection_Manager:
                 # use the one closest to the center of the image.
                 closest_index = self.find_closest_keypoint(keypoints)
                 # create center object from centermost keypoint
-                (x,y) = np.around([keypoints[closest_index]].pt)
+                (x,y) = np.around(keypoints[closest_index].pt)
             else:
                 # create center object from first and only keypoint
                 (x,y) = np.around(keypoints[0].pt)
-            
+
             x,y = int(x), int(y)
-            center = (x,y)
-            # create radius object
-            keypointRadius = np.around(keypoints[0].size/2)
-            keypointRadius = int(keypointRadius)
-            circleFrame = cv2.circle(img=nozzleDetectFrame, center=center, radius=keypointRadius,color=keypointColor,thickness=-1,lineType=cv2.LINE_AA)
-            nozzleDetectFrame = cv2.addWeighted(circleFrame, 0.4, nozzleDetectFrame, 0.6, 0)
-            nozzleDetectFrame = cv2.circle(img=nozzleDetectFrame, center=center, radius=keypointRadius, color=(0,0,0), thickness=1,lineType=cv2.LINE_AA)
-            nozzleDetectFrame = cv2.line(nozzleDetectFrame, (x-5,y), (x+5, y), (255,255,255), 2)
-            nozzleDetectFrame = cv2.line(nozzleDetectFrame, (x,y-5), (x, y+5), (255,255,255), 2)
-        else:
+
+            # Sanity check: Reject keypoints too far from image center (likely false positives)
+            # Allow detections within 40% of image dimensions from center
+            img_h, img_w = nozzleDetectFrame.shape[:2]
+            img_cx, img_cy = img_w // 2, img_h // 2
+            max_dist_x = img_w * 0.4  # 40% = 512 pixels at 1280
+            max_dist_y = img_h * 0.4  # 40% = 288 pixels at 720
+
+            if abs(x - img_cx) > max_dist_x or abs(y - img_cy) > max_dist_y:
+                self.log(f"Blob rejected: ({x},{y}) too far from center ({img_cx},{img_cy})")
+                keypoints = None  # Treat as not found
+                center = None
+            else:
+                center = (x,y)
+                # create radius object and draw visualization
+                keypointRadius = np.around(keypoints[0].size/2)
+                keypointRadius = int(keypointRadius)
+                circleFrame = cv2.circle(img=nozzleDetectFrame, center=center, radius=keypointRadius,color=keypointColor,thickness=-1,lineType=cv2.LINE_AA)
+                nozzleDetectFrame = cv2.addWeighted(circleFrame, 0.4, nozzleDetectFrame, 0.6, 0)
+                nozzleDetectFrame = cv2.circle(img=nozzleDetectFrame, center=center, radius=keypointRadius, color=(0,0,0), thickness=1,lineType=cv2.LINE_AA)
+                nozzleDetectFrame = cv2.line(nozzleDetectFrame, (x-5,y), (x+5, y), (255,255,255), 2)
+                nozzleDetectFrame = cv2.line(nozzleDetectFrame, (x,y-5), (x, y+5), (255,255,255), 2)
+
+        if center is None:
             # no keypoints, draw a 3 outline circle in the middle of the frame
             keypointRadius = 17
             nozzleDetectFrame = cv2.circle(img=nozzleDetectFrame, center=(640,360), radius=keypointRadius, color=(0,0,0), thickness=3,lineType=cv2.LINE_AA)
