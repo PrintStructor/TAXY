@@ -57,8 +57,8 @@ class Taxy_Server_Detection_Manager:
                 if model_path:
                     self.log(f"*** Loading AI Model: {model_path}")
                     try:
-                        self.yolo_detector = NozzleDetector(model_path, conf_thres=0.5)
-                        self.log("*** AI Model loaded successfully (conf_thres=0.5).")
+                        self.yolo_detector = NozzleDetector(model_path, conf_thres=0.15)
+                        self.log("*** AI Model loaded successfully (conf_thres=0.15).")
                     except Exception as e:
                         self.log(f"*** Failed to load AI Model: {e}")
                 else:
@@ -257,6 +257,38 @@ class Taxy_Server_Detection_Manager:
         self.relaxedDetector = cv2.SimpleBlobDetector_create(self.relaxedParams)
         self.superRelaxedDetector = cv2.SimpleBlobDetector_create(self.superRelaxedParams)
 
+    def _refine_center_in_roi(self, image, x1, y1, x2, y2):
+        """Refine nozzle center within YOLO bounding box using HoughCircles."""
+        try:
+            img_h, img_w = image.shape[:2]
+            bw, bh = x2 - x1, y2 - y1
+
+            # Add 50% padding around the bounding box
+            pad_x, pad_y = int(bw * 0.5), int(bh * 0.5)
+            rx1 = max(0, int(x1) - pad_x)
+            ry1 = max(0, int(y1) - pad_y)
+            rx2 = min(img_w, int(x2) + pad_x)
+            ry2 = min(img_h, int(y2) + pad_y)
+
+            roi = image[ry1:ry2, rx1:rx2]
+            gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+            blurred = cv2.GaussianBlur(gray, (7, 7), 6)
+
+            circles = cv2.HoughCircles(blurred, cv2.HOUGH_GRADIENT, dp=1.2,
+                                       minDist=max(int(min(bw, bh) // 2), 10),
+                                       param1=50, param2=30,
+                                       minRadius=max(int(min(bw, bh) * 0.15), 3),
+                                       maxRadius=int(max(bw, bh) * 0.6))
+
+            if circles is not None:
+                circles = np.round(circles[0]).astype(int)
+                roi_cx, roi_cy = (rx2 - rx1) // 2, (ry2 - ry1) // 2
+                best = min(circles, key=lambda c: (c[0] - roi_cx)**2 + (c[1] - roi_cy)**2)
+                return (float(best[0] + rx1), float(best[1] + ry1))
+        except Exception as e:
+            self.log(f"ROI refinement failed: {e}")
+        return None
+
     def nozzleDetection(self, image, fast_preview=False):
         # working frame object
         # For preview: shallow copy is OK (10x faster, frame not reused)
@@ -292,11 +324,18 @@ class Taxy_Server_Detection_Manager:
                             best_res = res
                             center = (cx, cy)  # Sub-pixel precision (float)
 
+                    # Refine center using circle detection within ROI
+                    refined = self._refine_center_in_roi(image, *best_res['box'])
+                    if refined:
+                        center = refined
+                        self.__algorithm = "AI_YOLO_REFINED"
+
                     # Draw results
                     x1, y1, x2, y2 = map(int, best_res['box'])
                     cv2.rectangle(nozzleDetectFrame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     cv2.circle(nozzleDetectFrame, (int(center[0]), int(center[1])), 5, (0, 0, 255), -1)
-                    label = f"Nozzle: {best_res['score']:.2f}"
+                    label_algo = "R" if "REFINED" in str(self.__algorithm) else "B"
+                    label = f"Nozzle({label_algo}): {best_res['score']:.2f}"
                     cv2.putText(nozzleDetectFrame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                     
                     # Draw crosshair
